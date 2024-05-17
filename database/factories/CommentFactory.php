@@ -25,8 +25,8 @@ class CommentFactory extends Factory
             'commentable_id' => null,
             'commentable_type' => null,
             'text' => $this->faker->text,
-            'published_at' => $this->faker->boolean ? $this->faker->dateTime : null,
-            'published_by' => null
+            'approved_at' => $this->faker->boolean ? $this->faker->dateTime : null,
+            'approved_by' => null
         ];
     }
 
@@ -89,30 +89,30 @@ class CommentFactory extends Factory
     }
 
     /**
-     * set published at
+     * set approved at
      *
-     * @param string $published_at
+     * @param string $approved_at
      *
      * @return static
      */
-    public function setPublishedAt(string $published_at): static
+    public function setApprove3dAt(string $approved_at): static
     {
         return $this->state(fn(array $attributes) => [
-            'published_at' => $published_at
+            'approved_at' => $approved_at
         ]);
     }
 
     /**
-     * set published by
+     * set approved by
      *
-     * @param int $published_by
+     * @param int $approved_by
      *
      * @return static
      */
-    public function setPublishedBy(int $published_by): static
+    public function setApprovedBy(int $approved_by): static
     {
         return $this->state(fn(array $attributes) => [
-            'published_by' => $published_by
+            'approved_by' => $approved_by
         ]);
     }
 }
