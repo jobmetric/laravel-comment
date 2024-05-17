@@ -3,6 +3,7 @@
 namespace JobMetric\Comment\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -13,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property mixed commentable_id
  * @property mixed commentable_type
  * @property mixed text
- * @property mixed published_at
- * @property mixed published_by
+ * @property mixed approved_at
+ * @property mixed approved_by
  * @property mixed user
  * @property mixed commentable
  */
@@ -26,8 +27,8 @@ class Comment extends Pivot
         'commentable_id',
         'commentable_type',
         'text',
-        'published_at',
-        'published_by'
+        'approved_at',
+        'approved_by'
     ];
 
     /**
@@ -39,8 +40,8 @@ class Comment extends Pivot
         'user_id' => 'integer',
         'parent_id' => 'integer',
         'text' => 'string',
-        'published_at' => 'datetime',
-        'published_by' => 'integer',
+        'approved_at' => 'datetime',
+        'approved_by' => 'integer',
     ];
 
     public function getTable()
@@ -69,12 +70,36 @@ class Comment extends Pivot
     }
 
     /**
-     * published relationship
+     * approved relationship
      *
      * @return MorphTo
      */
-    public function published(): BelongsTo
+    public function approver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'published_by');
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Scope approved.
+     *
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->whereNotNull('approved_at');
+    }
+
+    /**
+     * Scope unapproved.
+     *
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeUnApproved(Builder $query): Builder
+    {
+        return $query->whereNull('approved_at');
     }
 }
