@@ -15,6 +15,7 @@ class CommentServiceProvider extends PackageCoreServiceProvider
     {
         $package->name('laravel-comment')
             ->hasConfig()
+            ->hasTranslation()
             ->hasMigration();
     }
 }
