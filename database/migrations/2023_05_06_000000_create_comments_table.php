@@ -15,15 +15,15 @@ return new class extends Migration {
         Schema::create(config('comment.tables.comment'), function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')->index()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->index()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->index()->constrained(config('comment.tables.comment'))->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->morphs('commentable');
 
             $table->longText('text')->nullable();
 
-            $table->dateTime('published_at')->nullable()->index();
-            $table->foreignId('published_by')->index()->constrained(config('comment.tables.user'))->cascadeOnUpdate()->cascadeOnDelete();
+            $table->dateTime('approved_at')->nullable()->index();
+            $table->foreignId('approved_by')->nullable()->index()->constrained(config('comment.tables.user'))->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->timestamps();
         });
