@@ -102,4 +102,23 @@ class Comment extends Pivot
     {
         return $query->whereNull('approved_at');
     }
+
+    /**
+     * Scope text like.
+     *
+     * @param Builder $query
+     * @param string $text
+     *
+     * @return Builder
+     */
+    public function scopeText(Builder $query, string $text): Builder
+    {
+        $words = explode(' ', $text);
+
+        foreach ($words as $word) {
+            $query->where('text', 'like', "%$word%");
+        }
+
+        return $query;
+    }
 }
