@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use JobMetric\Comment\Models\Comment;
 
 /**
+ * @property int id
  * @method morphMany(string $class, string $string)
  */
 trait CanComment
@@ -17,7 +18,7 @@ trait CanComment
      */
     public function comments(): MorphMany
     {
-        return $this->morphMany(Comment::class, 'commenter');
+        return $this->morphMany(Comment::class, 'commentable');
     }
 
     /**
@@ -78,5 +79,22 @@ trait CanComment
     public function unapprovedReplies(): MorphMany
     {
         return $this->replies()->whereNull('approved_at');
+    }
+
+    /**
+     * approves a comment that this user has made.
+     *
+     * @param Comment $comment
+     *
+     * @return Comment
+     */
+    public function approveComment(Comment $comment): Comment
+    {
+        $comment->update([
+            'approved_at' => now(),
+            'approved_by' => $this->id,
+        ]);
+
+        return $comment;
     }
 }
