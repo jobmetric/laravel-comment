@@ -4,11 +4,13 @@ namespace JobMetric\Comment\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
+ * @property mixed id
  * @property mixed user_id
  * @property mixed parent_id
  * @property mixed commentable_id
@@ -19,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property mixed user
  * @property mixed commentable
  */
-class Comment extends Pivot
+class Comment extends Model
 {
     protected $fillable = [
         'user_id',
@@ -70,9 +72,29 @@ class Comment extends Pivot
     }
 
     /**
+     * parent relationship
+     *
+     * @return BelongsTo
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    /**
+     * children relationship
+     *
+     * @return HasMany
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    /**
      * approved relationship
      *
-     * @return MorphTo
+     * @return BelongsTo
      */
     public function approver(): BelongsTo
     {
