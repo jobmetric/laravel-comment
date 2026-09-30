@@ -15,7 +15,7 @@ if (!function_exists('comment')) {
      * @return array
      * @throws Throwable
      */
-    function comment(Model $model, string $text, int $parent_id = 0, int $user_id = null): array
+    function comment(Model $model, string $text, int $parent_id = 0, ?int $user_id = null): array
     {
         if (!in_array('JobMetric\Comment\HasComment', class_uses($model))) {
             throw new ModelHasCommentNotFoundException($model::class);
