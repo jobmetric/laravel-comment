@@ -18,4 +18,19 @@ class CommentServiceProvider extends PackageCoreServiceProvider
             ->hasTranslation()
             ->hasMigration();
     }
+    /**
+     * Register committed business outcome definitions alongside legacy events.
+     *
+     * @return void
+     */
+    public function afterBootPackage(): void
+    {
+        if ($this->app->bound('EventRegistry')) {
+            $registry = $this->app->make('EventRegistry');
+            $registry->register(\JobMetric\Comment\Events\Comment\CommentStoreCommittedEvent::class);
+            $registry->register(\JobMetric\Comment\Events\Comment\CommentUpdateCommittedEvent::class);
+            $registry->register(\JobMetric\Comment\Events\Comment\CommentDeleteCommittedEvent::class);
+            $registry->register(\JobMetric\Comment\Events\Comment\CommentApproveCommittedEvent::class);
+        }
+    }
 }

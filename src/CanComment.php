@@ -90,10 +90,16 @@ trait CanComment
      */
     public function approveComment(Comment $comment): Comment
     {
+        $outcomeWasApproved = $comment->approved_at !== null;
         $comment->update([
             'approved_at' => now(),
             'approved_by' => $this->id,
         ]);
+
+
+        if (! $outcomeWasApproved && $comment->wasChanged('approved_at')) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentApproveCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
 
         return $comment;
     }

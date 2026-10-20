@@ -61,7 +61,7 @@ trait HasComment
      * @return array
      * @throws Throwable
      */
-    public function commentBy(int $user_id, string $text, int $parent_id = null): array
+    public function commentBy(int $user_id, string $text, ?int $parent_id = null): array
     {
         return $this->comment($text, $parent_id, $user_id);
     }
@@ -138,7 +138,7 @@ trait HasComment
      * @return array
      * @throws Throwable
      */
-    public function comment(string $text, int $parent_id = null, int $user_id = null): array
+    public function comment(string $text, ?int $parent_id = null, ?int $user_id = null): array
     {
         $comment = $this->commentTo()->create([
             'user_id' => $user_id,
@@ -147,6 +147,9 @@ trait HasComment
         ]);
 
         event(new CommentStoredEvent($comment));
+        if ($comment->exists) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentStoreCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
 
         return [
             'ok' => true,
@@ -183,6 +186,9 @@ trait HasComment
         ]);
 
         event(new CommentUpdateEvent($comment));
+        if ($comment->wasChanged('text')) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentUpdateCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
 
         return [
             'ok' => true,
@@ -217,6 +223,9 @@ trait HasComment
         $comment->delete();
 
         event(new CommentForgetEvent($comment));
+        if (! $comment->exists) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentDeleteCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
 
         return [
             'ok' => true,
@@ -238,6 +247,9 @@ trait HasComment
             $comment->delete();
 
             event(new CommentForgetEvent($comment));
+        if (! $comment->exists) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentDeleteCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
         });
 
         return $this;
@@ -252,7 +264,7 @@ trait HasComment
      * @return array
      * @throws Throwable
      */
-    public function approveComment(int $comment_id, int $user_id = null): array
+    public function approveComment(int $comment_id, ?int $user_id = null): array
     {
         /** @var Comment $comment */
         $comment = $this->commentTo()->where('id', $comment_id)->first();
@@ -265,10 +277,14 @@ trait HasComment
             ];
         }
 
+        $outcomeWasApproved = $comment->approved_at !== null;
         $comment->update([
             'approved_at' => now(),
             'approved_by' => $user_id ?? auth()->id()
         ]);
+        if (! $outcomeWasApproved && $comment->wasChanged('approved_at')) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Comment\Events\Comment\CommentApproveCommittedEvent($comment->getKey()), $comment->getConnectionName());
+        }
 
         return [
             'ok' => true,
